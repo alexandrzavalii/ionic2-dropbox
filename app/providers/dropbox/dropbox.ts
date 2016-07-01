@@ -1,12 +1,17 @@
 import {Injectable} from '@angular/core';
 import {Http, Headers} from '@angular/http';
 import 'rxjs/add/operator/map';
+import {InAppBrowser} from 'ionic-native';
 
 @Injectable()
 export class Dropbox {
   http: Http
   private accessToken;
   public folderHistory;
+
+  private appKey;
+  private redirectURI;
+  private url;
 
   static get parameters(){
     return [[Http]]
@@ -16,6 +21,34 @@ export class Dropbox {
     this.http = http;
     this.accessToken = null;
     this.folderHistory = [];
+
+    //OAuth
+    this.appKey = "mhqbfhfpinf50w0";
+    this.redirectURI = "http://localhost";
+    this.url = 'https://www.dropbox.com/1/oauth2/authorize?client_id=' + this.appKey + '&redirect_uri=' + this.redirectURI + '&response_type=token';
+  }
+
+  login(){
+    return new Promise((resolve, reject) => {
+      let browser = InAppBrowser.open(this.url, '_blank');
+      browser.addEventListener('loadstart', (event) => {
+        //Ignore the dropbox authorize screen
+        if(event.url.indexOf('oauth2/authorize') > -1){
+          return;
+        }
+        //Check the redirect uri
+        if(event.url.indexOf(this.redirectURI) > -1 ){
+          browser.removeEventListener('exit', (event) => {});
+          browser.close();
+          let token = event.url.split('=')[1].split('&')[0];
+          this.accessToken = token;
+          resolve(event.url);
+        } else {
+          reject("Could not authenticate");
+        }
+      });
+
+    });
   }
 
   setAccessToken(token) {

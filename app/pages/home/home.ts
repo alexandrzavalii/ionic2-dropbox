@@ -4,8 +4,7 @@ import {Dropbox} from '../../providers/dropbox/dropbox';
 
 
 @Component({
-  templateUrl: 'build/pages/home/home.html',
-  providers: [Dropbox]
+  templateUrl: 'build/pages/home/home.html'
 })
 export class HomePage {
 
@@ -22,23 +21,25 @@ export class HomePage {
     this.nav = nav;
     this.dropbox = dropbox;
     this.depth = 0;
-
-    this.dropbox.setAccessToken("WyiECK0XdtAAAAAAAAATj8pjFHXP2neYSjVs_otnv8l2D-Go3RZ4KRyQhlbMnXFP");
     this.folders = [];
-
-    let loading = Loading.create({
-      content: 'Syncing from Dropbox...'
-    });
-
-    this.nav.present(loading);
-
-    this.dropbox.getFolders("undefined").subscribe(data => {
-      this.folders = data.entries;
-      loading.dismiss();
-    }, (err) => {
-      console.log(err);
-    });
   }
+
+  onPageDidEnter(){
+
+  let loading = Loading.create({
+    content: 'Syncing from Dropbox...'
+  });
+
+  this.nav.present(loading);
+
+  this.dropbox.getFolders("undefined").subscribe(data => {
+    this.folders = data.entries;
+    loading.dismiss();
+  }, (err) => {
+    console.log(err);
+  });
+
+}
 
   openFolder(path){
 
